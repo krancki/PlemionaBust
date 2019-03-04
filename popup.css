@@ -1,7 +1,22 @@
 
 
 .main-container{
-    width:200px;
-    height:300px;
+    min-height: 200px;
     background-color: #d2c09e;
+
+}
+
+#refreshBtn{
+    position: absolute;
+    right:8px;
+    bottom:8px;
+
+}
+#bustContent{
+    display: flex;
+    flex-direction: column;
+}
+
+.bust_block{
+    border-bottom: 2px solid saddlebrown;
 }
