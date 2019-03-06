@@ -1,27 +1,43 @@
 
+const id = Math.floor((Math.random() * 10000) + 1);
 
+
+let bustStatus = {
+    armyASelected: "false",
+    armyBSelected: "false",
+    isWorking:"false",
+    intervalSpeed:200,
+    windowCount:0,
+};
 
 
 document.onreadystatechange = function () {
     if (document.readyState === "complete") {
 
-        setInterval(()=>{chrome.runtime.sendMessage({broadcast:"true"});},1000);
-
+      /*  setInterval(() => {
+            chrome.runtime.sendMessage({broadcast: bustStatus, windowId:id});
+        }, 1000);
+       */
     }
-};
-
-window.onbeforeunload=function(event) {
-    chrome.runtime.sendMessage({broadcast:"false"})
 };
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        console.log(request);
-        if (!sender.tab) {
-            if (request.bustScan)
-                sendResponse({'currentTab':1});
-        }
 
+        if (!sender.tab && request.broadcast)
+            sendResponse({bustStatus: bustStatus, bustId:id});
+    });
+
+
+
+chrome.runtime.onMessage.addListener(
+    function (request, {tab}, sendResponse) {
+        console.log(id," ",request, "   ", !tab && request.bustStatus && request.windowId === id);
+        if (!tab && request.bustStatus && request.windowId === id) {
+            bustStatus=request.bustStatus;
+            console.log("Response: ",bustStatus);
+            sendResponse({present: true});
+        }
 
     });
 
@@ -66,18 +82,15 @@ army = {
     },
 
     checkAvailability: function (obj) {
-        if (
-            this.spear >= obj.spear &&
+        return this.spear >= obj.spear &&
             this.sword >= obj.sword &&
             this.axe >= obj.axe &&
             this.archer >= obj.archer &&
             this.spy >= obj.spy &&
             this.light >= obj.light &&
             this.marcher >= obj.marcher &&
-            this.heavy >= obj.heavy) {
-            return true;
-        };
-        return false;
+            this.heavy >= obj.heavy;
+
     },
     slowestUnit: function (obj) {
         let speed = 0;
@@ -124,14 +137,7 @@ armyB = {
 
 let btnArrayA;
 let btnArrayB;
-let isWorking = false;
 
-const config ={
-    'id':null,
-    'active':1,
-    'intervalSpeed' : 200,
-    'isWorking': false
-};
 
 
 let bustInfo = null;
@@ -179,7 +185,6 @@ loadArmy = () => {
 };
 
 
-
 armyAReturn = () => {
     army.armyReturn(armyA);
 };
@@ -188,18 +193,18 @@ armyBReturn = () => {
     army.armyReturn(armyB);
 };
 
-armyAAttack=()=>{
+armyAAttack = () => {
     army.armyAttack(armyA);
 };
-armyBAttack=()=>{
+armyBAttack = () => {
     army.armyAttack(armyB);
 };
 
-captchaFound=()=>{
+captchaFound = () => {
 
     let captcha = document.getElementsByClassName("");
 
-    if(captcha!=null) captchaFound = true;
+    if (captcha != null) captchaFound = true;
 
 };
 const TIMEPATTERN = 2 * 60 * 1000;
@@ -208,8 +213,7 @@ let i = 1;
 manager = () => {
 
 
-
-    if (army.checkAvailability(armyA) && !captchaFound() ) {
+    if (army.checkAvailability(armyA) && !captchaFound()) {
 
 
         let distance = parseInt(document.getElementsByClassName("farm_icon farm_icon_b")[i].parentNode.parentNode.getElementsByTagName("td")[7].innerText);
@@ -241,15 +245,15 @@ manager = () => {
 useBust = () => {
 
 
-    if (interval!=null) {
+    if (interval != null) {
         this.clearInterval(interval);
-        interval=null;
+        interval = null;
         isWorking = false;
         //self.value = "Off";
     } else {
         interval = setInterval(manager, 350);
         isWorking = true;
-       // self.value = "On";
+        // self.value = "On";
     }
 
 };
